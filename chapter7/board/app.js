@@ -18,8 +18,17 @@ app.set("view engine", "handlebars")
 app.set("views", __dirname + "/views")
 
 
-app.get("/", (req, res) => {
-    res.render("home", { title: "안녕하세요" })
+app.get("/", async (req, res) => {
+    const page = parseInt(req.query.page) || 1   // * 현재 페이지
+    const search = req.query.search || ""  // 검색어
+    try {
+        const [posts, paginator] = await postService.list(collection, page, search)
+        res.render("home", { title: " 테스트 게시판", search, paginator, posts })
+    } catch (error) {
+        console.error(error)
+        res.render("home", { title: "안녕하세요" })  // 에러있으면 빈 값으로 전달
+    }
+    // res.render("home", { title: "안녕하세요" })
 })
 
 app.get("/write", async (req, res) => {
@@ -35,6 +44,13 @@ app.post("/write", async (req, res) => {
     const result = await postService.writePost(collection, post)
     res.redirect(`/detail/${result.insertedId}`)
 })
+
+
+
+
+
+
+
 
 app.listen(3000, async () => {
     console.log("Server started")
