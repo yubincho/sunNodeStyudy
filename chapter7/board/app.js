@@ -36,7 +36,10 @@ app.get("/write", async (req, res) => {
 })
 
 app.get("/detail/:id", async (req, res) => {
-    res.render("detail", {title: "테스트 게시판"})
+    const result = await postService.getDetailPost(collection, req.params.id)
+    // console.log("[result]", result)
+    // console.log("[result.value]", result.value)
+    res.render("detail", {title: "테스트 게시판", post: result,})
 })
 
 app.post("/write", async (req, res) => {

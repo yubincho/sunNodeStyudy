@@ -42,3 +42,50 @@ RegExp 객체를 사용함으로써, search 문자열이 정확히 일치하지 
 search가 "test"라면, 정규 표현식은 /test/i가 됩니다.
 title 필드가 "Test", "TEST", "teSt" 등의 값을 가진 문서는 모두 이 쿼리에 의해 선택됩니다.
 이러한 방식은 사용자가 검색어를 입력할 때 대소문자를 정확히 맞추지 않아도 관련된 결과를 찾을 수 있게 해줍니다.
+
+------------------------
+
+post-service.js
+
+* async function getDetailPost(collection, id) {
+      return await collection.findOneAndUpdate({ _id: ObjectId(id) }, { $inc: { hits: 1 }}, projectionOption)
+
+  }
+  =>TypeError: Class constructor ObjectId cannot be invoked without 'new'
+
+: new 키워드 붙였더니 에러 해결됨
+
+async function getDetailPost(collection, id) {
+    return await collection.findOneAndUpdate({ _id: new ObjectId(id) }, { $inc: { hits: 1 }}, projectionOption)
+
+}
+
+---------------------
+* 책 코드 수정
+
+app.get("/detail/:id", async (req, res) => {
+    const result = await postService.getDetailPost(collection, req.params.id)
+    // console.log("[result]", result)
+    // console.log("[result.value]", result.value)
+    res.render("detail", {title: "테스트 게시판", post: result.value,})
+})
+
+* post: result.value로 내보내면 detail 화면에 아무값도 나오지 않음. 그래서 console.log로 찍어보았다.
+result.value가 undefined 로 나온것을 확인 후 value 를 삭제하니 해결되었다.
+
+=> console.log("[result]", result) 결과
+:[result] {
+   _id: new ObjectId('65a775f51b95b121712dd1b7'),
+   title: '7장을 수정중',
+   writer: '승귤',
+   content: '7장의 글 수정 API 부분을 수정하고 있습니다.',
+   hits: 9,
+   createdDt: '2024-01-17T06:38:45.140Z'
+ }
+
+=> console.log("[result.value]", result.value) 결과
+:[result.value] undefined
+
+-----------------------
+
+

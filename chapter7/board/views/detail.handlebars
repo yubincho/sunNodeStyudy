@@ -1,16 +1,17 @@
 <h1>{{ title }}</h1>
-<h2 class="text-xl">제목입니다.</h2>
+{{#with post}}
+<h2 class="text-xl">{{ title }}</h2>
 <div>
-    작성자 : <b>wkrtjdwk dlfma</b>
+    작성자 : <b>{{writer}}</b>
 </div>
 <div>
-    조회수 : 9999 | 작성일시 : 2022-01-01 00:00:00
+    조회수 : {{hits}} | 작성일시 : {{dateString createdDt}}
     <button type="button" onclick="modifyPost()">수정</button>
     <button type="button" onclick="deletePost()">삭제</button>
 </div>
 
 <div>
-    <pre>본문입니다. 하이호이</pre>
+    <pre>{{content}}</pre>
 </div>
 
 <section>
@@ -19,6 +20,7 @@
     </div>
 
     <form method="post" action="/write-comment">
+        <input type="hidden" name="id" value="{{_id}}">
         <div>
             <div>
                 <input type="text" name="name" placeholder="이름을 입력해주세요" />
@@ -47,9 +49,14 @@
         <pre>{{comment}}</pre>
     </div>
 </section>
-
+{{/with}}
 <footer>
     <div>
         <a href="/">목록으로</a>
     </div>
 </footer>
+
+<script>
+    async function modifyPost() {}
+    async function deletePost() {}
+</script>
