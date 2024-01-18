@@ -33,10 +33,48 @@ async function getDetailPost(collection, id) {
 
 }
 
+async function getPostByIdAndPassword(collection, { id, password }) {
+    return await collection.findOne({ _id: new ObjectId(id), password: password }, projectionOption)
+}
+
+async function getPostById(collection, id) {
+    return await collection.findOne({ _id: new ObjectId(id) }, projectionOption)
+}
+
+
+async function updatePost(collection, id, post) {
+    const toUpdatePost = {
+        $set: {
+            ...post,
+        }
+    }
+    return await collection.updateOne({ _id: new ObjectId(id) }, toUpdatePost)
+}
+
+async function deleteOne(collection, id, password) {
+    try {
+        const result = await collection.deleteOne({ _id: new ObjectId(id), password: password })
+        if (result.deletedCount !== 1) {
+            console.log("[result]", result)
+            console.log("삭제 실패")
+            console.log("[result.deleteCount]", result.deletedCount)
+            return false
+        }
+        return true
+    } catch (error) {
+        console.error(error)
+        return false
+    }
+
+}
 
 
 module.exports = {
     list,
     writePost,
     getDetailPost,
+    getPostByIdAndPassword,
+    getPostById,
+    updatePost,
+    deleteOne,
 }

@@ -4,6 +4,7 @@ const app = express()
 const postService = require("./services/post-service")
 
 const mongodbConnection = require("./configs/mongodb-connection")
+const {ObjectId} = require("mongodb");
 let collection;
 
 app.engine("handlebars",
@@ -32,7 +33,13 @@ app.get("/", async (req, res) => {
 })
 
 app.get("/write", async (req, res) => {
-    res.render("write", { title: "테스트 게시판" })
+    res.render("write", { title: "테스트 게시판", mode: "create" })
+})
+
+app.get("/modify/:id", async (req, res) => {
+    const post = await postService.getPostById(collection, req.params.id)
+    console.log("[post]", post)
+    res.render("write", { title: "테스트 게시판", mode: "modify", post })
 })
 
 app.get("/detail/:id", async (req, res) => {
@@ -49,7 +56,86 @@ app.post("/write", async (req, res) => {
 })
 
 
+app.post("/modify/", async (req, res) => {
+    const { id, title, writer, password, content } = req.body
 
+    const post = {
+        title,
+        writer,
+        password,
+        content,
+        // createdDt: new Date().toISOString(),
+    }
+
+    const result = postService.updatePost(collection, id, post)
+    res.redirect(`/detail/${id}`)
+})
+
+
+app.delete("/delete", async (req, res) => {
+    const { id, password } = req.body
+    try {
+        const result = await collection.deleteOne({ _id: new ObjectId(id), password: password })
+        if (result.deletedCount !== 1) {
+            console.log("삭제 실패")
+            return res.json({ isSuccess: false })
+        }
+        return res.json({ isSuccess: true })
+    } catch (error) {
+        console.error(error)
+        return res.json({ isSuccess: false })
+    }
+})
+
+
+// delete 구현을 controller 와 service 계층으로 분리
+// 삭제 후 홈 화면으로 redirect 는 view(detail핸들바) 에서 설정.
+app.delete("/delete/:id", async (req, res) => {
+    const { id, password } = req.body
+    const isSuccess  = postService.deleteOne(collection, id, password)
+
+    return res.json({ isSuccess })
+})
+
+
+app.post("/write-comment", async (req, res) => {
+    const { id, name, password, comment } = req.body
+    const post = await postService.getPostById(collection, id)
+
+    if (post.comments) {
+        post.comments.push({
+            idx: post.comments.length + 1,
+            name,
+            password,
+            comment,
+            createdDt: new Date().toISOString(),
+        })
+    } else {
+        post.comments = [
+            {
+                idx: 1,
+                name,
+                password,
+                comment,
+                createdDt: new Date().toISOString(),
+            }
+        ]
+    }
+    await postService.updatePost(collection, id, post)
+    return res.redirect(`/detail/${id}`)
+})
+
+
+app.post("/check-password", async (req, res) =>  {
+    const { id, password } = req.body
+    const post = await postService.getPostByIdAndPassword(collection, { id, password })
+
+    if (!post) {
+        return res.status(404).json({ isExist: false })
+    } else {
+        return res.json({ isExist: true })
+    }
+})
 
 
 
