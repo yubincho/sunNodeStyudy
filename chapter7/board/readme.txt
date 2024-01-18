@@ -1,10 +1,30 @@
 
+* 설치 및 파일 수정
+
 npm init -y
 npm i express
 npm i mongodb
 npm i express-handlebars
 npm i nodemon
 npm i lodash
+
+
+---------------
+(테스팅) Jest 라이브러리
+
+npm install --save-dev jest
+"scripts": {
+    "test": "jest"
+}
+
+프로젝트 내에 __tests__ 폴더를 생성
+파일 이름에 .test.js 또는 .spec.js를 붙임
+
+테스트 실행: npm test
+
+*** jest > 몽고디비 test
+: mock 몽고디비 + 실제 mongoClient 를 불러와야 함
+
 
 ----------------
 
