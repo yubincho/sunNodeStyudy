@@ -143,3 +143,12 @@ result.value가 undefined 로 나온것을 확인 후 value 를 삭제하니 해
 
 ------------------------
 
+* 댓글 삭제 로직 수정
+
+parseInt 추가
+
+post.comments = post.comments.filter(comment => comment.idx !== parseInt(idx));
+
+filter 함수 내에서 comment.idx !== idx를 비교할 때, comment.idx와 idx는 동일한 타입이어야 합니다.
+idx가 문자열이라면 comment.idx도 문자열이어야 하며,
+정수라면 둘 다 정수여야 합니다. parseInt를 사용하여 idx를 정수로 변환하는 경우, comment.idx도 정수로 처리되어야 합니다.

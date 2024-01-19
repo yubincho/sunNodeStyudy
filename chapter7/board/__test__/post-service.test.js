@@ -62,3 +62,53 @@ test('1개 게시물 가져오기 , service 코드 확인', async () => {
 
 })
 
+
+// 댓글 삭제 로직
+async function deleteComment(collection, id, idx) {
+    const post = await collection.findOne({
+        _id: new ObjectId(id),
+        comments: { $elemMatch: { idx: parseInt(idx) } },
+    });
+
+    if (!post) {
+        return false;
+    }
+
+    post.comments = post.comments.filter(comment => comment.idx !== parseInt(idx));
+    await collection.updateOne({ _id: new ObjectId(id) }, { $set: { comments: post.comments } });
+    return true;
+}
+
+// 테스트 케이스
+test('댓글 삭제', async () => {
+    const mockCollection = {
+        findOne: jest.fn().mockResolvedValue({
+            _id: "65a3d2820391157561a008ed",
+            comments: [
+                { idx: 1, content: 'First Comment' },
+                { idx: 2, content: 'Second Comment' }
+            ]
+        }),
+        updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 })
+    };
+
+    const postId = "65a3d2820391157561a008ed";
+    const commentIdx = 1; // 삭제할 댓글의 idx
+
+    const result = await deleteComment(mockCollection, postId, commentIdx);
+
+    // 성공적으로 댓글이 삭제되었는지 확인
+    expect(result).toBe(true);
+
+    // findOne이 올바르게 호출되었는지 확인
+    expect(mockCollection.findOne).toHaveBeenCalledWith({
+        _id: new ObjectId(postId),
+        comments: { $elemMatch: { idx: commentIdx } }
+    });
+
+    // updateOne이 올바르게 호출되었는지 확인
+    expect(mockCollection.updateOne).toHaveBeenCalledWith(
+        { _id: new ObjectId(postId) },
+        { $set: { comments: [{ idx: 2, content: 'Second Comment' }] } }
+    );
+});

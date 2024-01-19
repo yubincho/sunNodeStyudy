@@ -155,7 +155,7 @@ app.delete("/delete-comment", async (req, res) => {
 
     // post.comments = post.comments.filter((comment) => post.comments.splice(comment.idx === idx, 1))
 
-    post.comments = post.comments.findIndex(comment => comment.idx !== idx);
+    post.comments = post.comments.filter(comment => comment.idx !== parseInt(idx));
     // post.comments = post.comments.filter((comment) => indexToRemove !== idx) //
 
     // console.log("[indexToRemove]", indexToRemove)
