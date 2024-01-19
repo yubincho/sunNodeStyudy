@@ -18,6 +18,13 @@ app.use(express.urlencoded({ extended: true }))
 app.set("view engine", "handlebars")
 app.set("views", __dirname + "/views")
 
+const projectionOption = {
+    projection: {
+        password: 0,
+        "comments.password": 0,
+    }
+}
+
 
 app.get("/", async (req, res) => {
     const page = parseInt(req.query.page) || 1   // * 현재 페이지
@@ -100,6 +107,12 @@ app.delete("/delete/:id", async (req, res) => {
 
 app.post("/write-comment", async (req, res) => {
     const { id, name, password, comment } = req.body
+    Object.entries(req.body).forEach(([key, value]) => {
+        // 여기에서 키와 값을 사용한 작업 수행
+        if (!req.body[key]) {
+            return res.status(400).send(`Error: ${key} is required.`);
+        }
+    });
     const post = await postService.getPostById(collection, id)
 
     if (post.comments) {
@@ -123,6 +136,38 @@ app.post("/write-comment", async (req, res) => {
     }
     await postService.updatePost(collection, id, post)
     return res.redirect(`/detail/${id}`)
+})
+
+
+app.delete("/delete-comment", async (req, res) => {
+    const { id, idx, password } = req.body
+
+    const post = await collection.findOne({
+        _id: new ObjectId(id),
+        comments: { $elemMatch: {idx: parseInt(idx), password} },
+    },
+        postService.projectionOption,
+    )
+
+    if (!post) {
+        return res.json({ isSuccess: false })
+    }
+
+    // post.comments = post.comments.filter((comment) => post.comments.splice(comment.idx === idx, 1))
+
+    post.comments = post.comments.findIndex(comment => comment.idx !== idx);
+    // post.comments = post.comments.filter((comment) => indexToRemove !== idx) //
+
+    // console.log("[indexToRemove]", indexToRemove)
+    // if (indexToRemove !== -1) {
+    //     post.comments.splice(indexToRemove, 1);
+    // }
+
+    console.log("[post.comments]", post.comments)
+
+    await postService.updatePost(collection, id, post)
+    return res.json({ isSuccess: true })
+
 })
 
 

@@ -10,7 +10,7 @@ npm i lodash
 
 
 ---------------
-(테스팅) Jest 라이브러리
+(테스팅 추가) Jest 라이브러리
 
 npm install --save-dev jest
 "scripts": {
@@ -24,6 +24,32 @@ npm install --save-dev jest
 
 *** jest > 몽고디비 test
 : mock 몽고디비 + 실제 mongoClient 를 불러와야 함
+
+
+----------------
+
+프로젝트 구조
+
+* 게시글 : 데이터 스키마 설정없이 object 로 저장가능
+
+* 게시글 <---> 댓글
+연관관계 필요없이 게시글의 id 를 가져와 댓글 쓸때 저장하면
+게시글의 댓글로 포함됨
+
+
+(예시)
+detail.handlebars
+<input type="hidden" name="id" value="{{_id}}"> // 본문 id 를 저장하게 됨
+
+[몽고디비 데이터 확인]
+_id:65a8c689990937093630c228
+title : "1"
+writer:"1"
+password:"1"
+content:"1"
+hits:3
+createdDt:"2024-01-18T06:34:49.974Z"
+comments:Array (1)
 
 
 ----------------
@@ -114,3 +140,6 @@ result.value가 undefined 로 나온것을 확인 후 value 를 삭제하니 해
 -> 그런데 게시물 수정하면 최초 등록일자로 변경되어 목록 맨 위로 올라오는 현상
 => 모든 modify 메서드에도  new Date()으로 설정했기 때문.
 그래서 modify 메서드 > post 객체에 날짜 부분 삭제
+
+------------------------
+
